@@ -34,8 +34,8 @@ class Details extends Component {
                             <div className='temp_max'><span className="detail-title">Max Temp: </span>{this.props.temp_max}</div>
                             <div className='wind_speed'><span className="detail-title">Wind speed: </span>{[this.props.wind_speed]}</div>
                             <div className='wind_deg'><span className="detail-title">Wind deg: </span>{[this.props.wind_deg]}</div>
-                            <div className='sunrise'><span className="detail-title">Sunrise: </span>{this.getTimeHM(this.props.sunrise)}</div>
-                            <div className='sunset'><span className="detail-title">Sunset: </span>{this.getTimeHM(this.props.sunset)}</div>
+                            <div className='sunrise'><span className="detail-title">Sunrise: </span>{this.getTimeHM(this.props.sunrise)} GMT-5</div>
+                            <div className='sunset'><span className="detail-title">Sunset: </span>{this.getTimeHM(this.props.sunset)} GMT-5</div>
                         </div>
                     
                     </div>
