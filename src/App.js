@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 import DisplayData from './displayData.js';
+import Forecast from './forecast.js';
+import Details from './details.js';
 
 
 
@@ -14,26 +16,11 @@ class App extends Component {
             location: '',
             weather: '',
             unit: '',
-            tempDay1: '',
-            tempDay2: '',
-            tempDay3: '',
-            tempDay4: '',
-            tempDay5: '',
-            tempDay1F: '',
-            tempDay1C: '',
-            tempDay2F: '',
-            tempDay2C: '',
-            tempDay3F: '',
-            tempDay3C: '',
-            tempDay4F: '',
-            tempDay4C: '',
-            tempDay5F: '',
-            tempDay5C: '',
-            tempDay1Weather: '',
-            tempDay2Weather: '',
-            tempDay3Weather: '',
-            tempDay4Weather: '',
-            tempDay5Weather: '',
+            tempDayKelv: [],
+            tempDay: [],
+            tempDayC: [],
+            tempDayF: [],
+            tempDayWeather: [],
             pressure: '',
             humidity: '',
             temp_min: '',
@@ -46,7 +33,7 @@ class App extends Component {
             wind_deg:'',
             sunrise: '',
             sunset: '',
-            placeholder: "Enter City name",
+            placeholder: "Enter City name and press Enter",
             latitude: '43.474731',
             longitude: '-89.744186',
             currentWeatherAPIcity: 'https://api.openweathermap.org/data/2.5/weather?q=',
@@ -55,56 +42,31 @@ class App extends Component {
         
         this.changeLocation = this.changeLocation.bind(this);
         this.switchUnits = this.switchUnits.bind(this);
-        this.getTimeHM = this.getTimeHM.bind(this);
-        
-    }
-
+        this.forecastTemperature = this.forecastTemperature.bind(this);
+        this.convertToC = this.convertToC.bind(this);
+        this.convertToF = this.convertToF.bind(this);
+        this.forecastTemperature = this.forecastTemperature.bind(this);
  
-    componentWillMount(){
-        
     }
 
-    componentDidMount() {
-        this.getCoordinates();
-        
-        this.getData(this.state.currentWeatherAPIcity, this.state.forecastWeatherAPIcity, this.state.weatherLocation);
+    componentWillMount() {
+        this.getData(this.state.currentWeatherAPIcity, this.state.forecastWeatherAPIcity, this.state.weatherLocation); 
     }
 
     componentDidUpdate(prevProps, prevState) {
         if(prevState.weatherLocation !== this.state.weatherLocation  || prevState.units !== this.state.units) {
-            
             this.temperature();
             this.getData(this.state.currentWeatherAPIcity, this.state.forecastWeatherAPIcity, this.state.weatherLocation);
         }
         
     }
 
-    getCoordinates(){
-        const geoLocation = 'https://cors-anywhere.herokuapp.com/https://api.ipstack.com/check?access_key=4a259666da80eb87ee33bcda027d4d57'
-
-        fetch(geoLocation)  
-        .then(response => response.json()) // Convert data to json
-        .then(data => this.setState({
-          latitude: data.latitude,
-          longitude: data.longitude
-
-        })).catch(function(error) {  
-            console.log("Can't locate");
-        });
-        
-        console.log('now'+this.state.longitude);
-    }
-    
-
-    getData(currentW, forecastW, weatherL){
-        const key = '77cbd5a8a802c2ea563adff930f81ab4';
+    getData(currentW, forecastW, weatherL){ //gets weather data from api
+        const key = process.env.REACT_APP_WEATHER_API_KEY; //gets data from .env file
         let current = currentW + weatherL +'&APPID=' + key;
         let forecast = forecastW + weatherL +'&APPID=' + key;
-        console.log('current: '+current);
-        console.log('current: '+forecast);
         
-
-        fetch(current)  
+        fetch(current)   //gets current weather data
         .then(response => response.json()) // Convert data to json
         .then(data => this.setState({
             temp: Math.round(parseFloat(data.main.temp)-273.15) + '\xBAC',
@@ -126,95 +88,93 @@ class App extends Component {
             sunset: data.sys.sunset
 
         })).catch(function(error) {
-            
-            
-            alert("Can't find this location, Try Again");
-            
+            alert("Can't find this location, Try Again");   
         });
         
-      
-
-        fetch(forecast)  
+        fetch(forecast)  //gets forecast data
         .then(response => response.json()) // Convert data to json
         .then(data => this.setState({
-            tempDay1: Math.round(parseFloat(data.list[1].main.temp)-273.15) + '\xBAC',
-            tempDay1C: Math.round(parseFloat(data.list[1].main.temp)-273.15) + '\xBAC',
-            tempDay1F:Math.round(((parseFloat(data.list[1].main.temp)-273.15)*1.8)+32) + '\xBAF',
-            tempDay2: Math.round(parseFloat(data.list[2].main.temp)-273.15) + '\xBAC',
-            tempDay2C: Math.round(parseFloat(data.list[2].main.temp)-273.15) + '\xBAC',
-            tempDay2F:Math.round(((parseFloat(data.list[2].main.temp)-273.15)*1.8)+32) + '\xBAF',
-            tempDay3: Math.round(parseFloat(data.list[3].main.temp)-273.15) + '\xBAC',
-            tempDay3C: Math.round(parseFloat(data.list[3].main.temp)-273.15) + '\xBAC',
-            tempDay3F:Math.round(((parseFloat(data.list[3].main.temp)-273.15)*1.8)+32) + '\xBAF',
-            tempDay4: Math.round(parseFloat(data.list[4].main.temp)-273.15) + '\xBAC',
-            tempDay4C: Math.round(parseFloat(data.list[4].main.temp)-273.15) + '\xBAC',
-            tempDay4F:Math.round(((parseFloat(data.list[4].main.temp)-273.15)*1.8)+32) + '\xBAF',
-            tempDay5: Math.round(parseFloat(data.list[5].main.temp)-273.15) + '\xBAC',
-            tempDay5C: Math.round(parseFloat(data.list[5].main.temp)-273.15) + '\xBAC',
-            tempDay5F:Math.round(((parseFloat(data.list[5].main.temp)-273.15)*1.8)+32) + '\xBAF',
-            tempDay1Weather: (data.list[1].weather[0].main),
-            tempDay2Weather: (data.list[2].weather[0].main),
-            tempDay3Weather: (data.list[3].weather[0].main),
-            tempDay4Weather: (data.list[4].weather[0].main),
-            tempDay5Weather: (data.list[5].weather[0].main)
+
+            tempDayKelv: this.forecastTemperature(data),
+            tempDay: this.convertToC(this.forecastTemperature(data)),
+            tempDayC: this.convertToC(this.forecastTemperature(data)),
+            tempDayF: this.convertToF(this.forecastTemperature(data)),
+            tempDayWeather: this.forecastWeather(data)
+            
         }));
         
     }
 
-    changeLocation(e){
+    forecastTemperature(temp) { //gets temperature for next 5 days from API and saves it to array
+        let i;
+        let arr = [];
+            for (i = 0; i < 5; i++) {
+                arr = arr.concat(temp.list[i].main.temp);
+            }
+            return arr;
+    }
+
+    forecastWeather(weather){ //gets weather condition for next 5 days from API and saves it to array
+        let i;
+        let arr = [];
+            for (i = 1; i < 6; i++) {
+                arr = arr.concat((weather.list[i].weather[0].main));
+            }
+            return arr;
+    }
+
+    changeLocation(e){ //takes data from input and saves new location to state
         e.preventDefault();
        if(this._inputElement.value !== "") {
            this.setState({
                weatherLocation: this._inputElement.value
-
            })
-           //this.getData();
-           
        } 
-      
     }
 
-    switchUnits(e){
-        
+    switchUnits(e){  
         e.preventDefault();
-        console.log(this.state.latitude);
-        console.log(this.state.longitude)
         if(this.state.unit === 'C'){
             this.setState({
                 unit: 'F'
             })
             this.temperature();
-  
         } else {
             this.setState({
                 unit: 'C'
             })
             this.temperature();
-    
         }
     }
 
-    temperature(){
-      
+    convertToC(kelv){  //converting default API temperature (kelvin) to celsius
+        for(let i = 0; i<5; i++){
+            console.log(kelv[i]);
+            kelv[i] = Math.round(parseFloat(kelv[i])-273.15) + '\xBAC';
+            console.log(kelv[i]);
+        }
+        return kelv;   
+    }
+
+    convertToF(kelv){ //converting default API temperature (kelvin) to farenheit
+        for(let i = 0; i<5; i++){
+            kelv[i] = Math.round(((parseFloat(kelv[i])-273.15)*1.8)+32) + '\xBAF';
+        }
+        return kelv;   
+    }
+
+    temperature(){ //switching temperature units C <=> F
         if(this.state.unit === 'C') {
             this.setState({
                 temp: this.state.tempC,
-                tempDay1: this.state.tempDay1C,
-                tempDay2: this.state.tempDay2C,
-                tempDay3: this.state.tempDay3C,
-                tempDay4: this.state.tempDay4C,
-                tempDay5: this.state.tempDay5C,
+                tempDay: this.state.tempDayC,
                 temp_min: this.state.temp_minC,
                 temp_max: this.state.temp_maxC
             })
         } else {
             this.setState({
                 temp: this.state.tempF,
-                tempDay1: this.state.tempDay1F,
-                tempDay2: this.state.tempDay2F,
-                tempDay3: this.state.tempDay3F,
-                tempDay4: this.state.tempDay4F,
-                tempDay5: this.state.tempDay5F,
+                tempDay: this.state.tempDayF,
                 temp_min: this.state.temp_minF,
                 temp_max: this.state.temp_maxF
             })
@@ -222,42 +182,11 @@ class App extends Component {
     }
 
     
-
-    getTime(dayNumber){
-        let today = new Date();
-        let nextDay = new Date();
-        let day = nextDay.setDate(today.getDate()+dayNumber);
-        var dd = String(nextDay.getDate()).padStart(2, '0');
-        var mm = String(nextDay.getMonth() + 1).padStart(2, '0');
-        var yyyy = nextDay.getFullYear();
-        day = mm + '/' + dd + '/' + yyyy;
-        return day;
-    }
-
-    
-
-    getTimeHM(time){
-        let d = new Date(time*1000);
-        let h = d.getHours();
-        if (h < 10) {
-            h = "0" + h;
-        }
-        let m = d.getMinutes();
-        if (m < 10) {
-            m = "0" + m;
-        }
-        let s = d.getSeconds();
-        d = h  + ':' + m + ':' +s;
-        return d;
-    }
-
-    conditionIcon(condition){
-   
-        const iconUrl = 'http://openweathermap.org/img/w/';
+    conditionIcon(condition){ //changing weather icon according to weather data from API
         switch(condition) {
             case 'Rain':
                 return require('./icons/rainy-6.svg')
-                
+            
             case 'Clear':
                 return require('./icons/day.svg')
 
@@ -296,13 +225,7 @@ class App extends Component {
         }
     }
 
-  
-    
-    render(){
-        
-        
-        
-        
+    render(){     
         return(
             <div  className="wrapper">
             
@@ -317,7 +240,8 @@ class App extends Component {
                     </form>
                     <button onClick={this.switchUnits} className='switch-units'>C|F</button>
                </div>
-               <DisplayData
+
+               <DisplayData //displaying current weather data
                units = {this.switchUnits}
                temp = {[this.state.temp]}
                location = {[this.state.location]}
@@ -325,60 +249,19 @@ class App extends Component {
                forecast = 'Forecast'
                icon = {[this.conditionIcon(this.state.weather)]} 
               
+               />
+               
+                <Forecast {...this.state} //displaying forecast weather data
+                    conditionIcon1={this.conditionIcon(this.state.tempDayWeather[0])}
+                    conditionIcon2={this.conditionIcon(this.state.tempDayWeather[1])}
+                    conditionIcon3={this.conditionIcon(this.state.tempDayWeather[2])}
+                    conditionIcon4={this.conditionIcon(this.state.tempDayWeather[3])}
+                    conditionIcon5={this.conditionIcon(this.state.tempDayWeather[4])}
                 />
-                
-                    
-                   
-                    
-                    
-                    <div className="forecast-grid">
-                    <div className="forecast">
-                        <div className='display-date'>{this.getTime(1)}</div>
-                        <div className='forecast-temp'>{this.state.tempDay1}</div>
-                        <div className='forecast-icon'><img src={this.conditionIcon(this.state.tempDay1Weather)}/></div>
-                        <div className='forecast-cond'>{this.state.tempDay1Weather}</div>
-                    </div>
-                    <div className="forecast">
-                        <div className='display-date'>{this.getTime(2)}</div>
-                        <div className='forecast-temp'>{this.state.tempDay2}</div>
-                        <div className='forecast-icon'><img src={this.conditionIcon(this.state.tempDay2Weather)}/></div>
-                        <div className='forecast-cond'>{this.state.tempDay2Weather}</div>
-                    </div>
-                    <div className="forecast">
-                        <div className='display-date'>{this.getTime(3)}</div>
-                        <div className='forecast-temp'>{this.state.tempDay3}</div>
-                        <div className='forecast-icon'><img src={this.conditionIcon(this.state.tempDay3Weather)}/></div>
-                        <div className='forecast-cond'>{this.state.tempDay3Weather}</div>
-                    </div>
-                    <div className="forecast">
-                        <div className='display-date'>{this.getTime(4)}</div>
-                        <div className='forecast-temp'>{this.state.tempDay4}</div>
-                        <div className='forecast-icon'><img src={this.conditionIcon(this.state.tempDay4Weather)}/></div>
-                        <div className='forecast-cond'>{this.state.tempDay4Weather}</div>
-                    </div>
-                    <div className="forecast">
-                        <div className='display-date'>{this.getTime(5)}</div>
-                        <div className='forecast-temp'>{this.state.tempDay5}</div>
-                        <div className='forecast-icon'><img src={this.conditionIcon(this.state.tempDay5Weather)}/></div>
-                        <div className='forecast-cond'>{this.state.tempDay5Weather}</div>
-                    </div>
-                      
-                    </div>
-                    <div className="weather-details">
-                    <div className="details">
-                        <div className='pressure'><span className="detail-title">Pressure: </span>{this.state.pressure}</div>
-                        <div className='humidity'><span className="detail-title">Humidity: </span>{this.state.humidity}</div>
-                        <div className='temp_min'><span className="detail-title">Min Temp: </span>{this.state.temp_min}</div>
-                        <div className='temp_max'><span className="detail-title">Max Temp: </span>{this.state.temp_max}</div>
-                        <div className='wind_speed'><span className="detail-title">Wind speed: </span>{[this.state.wind_speed]}</div>
-                        <div className='wind_deg'><span className="detail-title">Wind deg: </span>{[this.state.wind_deg]}</div>
-                        <div className='sunrise'><span className="detail-title">Sunrise: </span>{this.getTimeHM(this.state.sunrise)}</div>
-                        <div className='sunset'><span className="detail-title">Sunset: </span>{this.getTimeHM(this.state.sunset)}</div>
-                    </div>
-                    
-                    </div>
-                
-                   
+                 
+                <Details {...this.state} //displaying current weather details
+                /> 
+                     
             </div>
            
         )
@@ -387,4 +270,3 @@ class App extends Component {
 }
 
 export default App;
-
